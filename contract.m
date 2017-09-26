@@ -63,11 +63,14 @@ block.RegBlockMethod('Terminate', @Terminate); % Required
 %%
 function Outputs(block)
 
-V = block.InputPort(1).Data;
-alpha = block.InputPort(2).Data;
-beta = block.InputPort(3).Data;
 
-block.OutputPort(1).Data = V * cos(alpha) * cos(beta);
+output = 1;
+
+for i = 1 : block.NumInputPorts
+    output = output & block.InputPort(i).Data
+end
+
+block.OutputPort(1).Data = output;
 %end Outputs
 
 
