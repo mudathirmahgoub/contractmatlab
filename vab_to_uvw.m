@@ -16,10 +16,13 @@ function setup(block)
 % Register number of ports
 values = get_param(block.BlockHandle,'MaskValues');
 
-% get the size of assume ports
+% get the size of input ports
 assumePorts = str2num(char(values(1)));
-block.NumInputPorts  = assumePorts;
-block.NumOutputPorts = 3;
+modePorts = str2num(char(values(2)));
+block.NumInputPorts  = assumePorts + modePorts;
+
+% only one output port for the contract
+block.NumOutputPorts = 1;
 
 % Setup port properties to be inherited or dynamic
 block.SetPreCompInpPortInfoToDynamic;
@@ -65,8 +68,6 @@ alpha = block.InputPort(2).Data;
 beta = block.InputPort(3).Data;
 
 block.OutputPort(1).Data = V * cos(alpha) * cos(beta);
-block.OutputPort(2).Data = V * sin(beta);
-block.OutputPort(3).Data = V * cos(alpha) * cos(beta);
 %end Outputs
 
 
