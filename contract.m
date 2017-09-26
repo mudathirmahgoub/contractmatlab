@@ -1,4 +1,4 @@
-function vab_to_uvw(block)
+function contract(block)
 
 setup(block);
 %endfunction
