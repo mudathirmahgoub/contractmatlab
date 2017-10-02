@@ -11,7 +11,7 @@ index = 0;
 assumePorts = str2num(char(values(1)));
 for i= 1 : assumePorts
     index = index + 1;
-    portStr(index) = {['port_label(''input'',',num2str(index),',''assume'')']};    
+    portStr(index) = {['port_label(''input'',',num2str(index),',''assume'')']};       
 end
 
 % get the size of guarantee ports
@@ -32,5 +32,13 @@ end
 index = index + 1;
 portStr(index) = {['port_label(''output'',',num2str(1),',''valid'')']};    
 set_param(block,'MaskDisplay',char(portStr));
+
+
+ %% add or remove blocks
+    blockModel = bdroot(gcb);
+    open_system(blockModel);
+    BlockPaths = find_system(blockModel,'Type','Block');
+    BlockTypes = get_param(BlockPaths,'BlockType');
+    add_block('Kind/assume',strcat(blockModel,'/','assume'),'MakeNameUnique','on');
 
 end
