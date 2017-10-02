@@ -21,9 +21,14 @@ assumePorts = str2num(char(values(1)));
 guaranteePorts = str2num(char(values(2)));
 modePorts = str2num(char(values(3)));
 block.NumInputPorts  = assumePorts + guaranteePorts + modePorts;
-
 % only one output port for the contract
 block.NumOutputPorts = 1;
+
+% all ports are boolean
+for i = 1 : block.NumInputPorts
+    block.InputPort(i).DatatypeID = 8; %'boolean';
+end
+block.OutputPort(1).DatatypeID = 8; %'boolean';
 
 % Setup port properties to be inherited or dynamic
 block.SetPreCompInpPortInfoToDynamic;
@@ -64,12 +69,35 @@ block.RegBlockMethod('Terminate', @Terminate); % Required
 %%
 function Outputs(block)
 
+values = get_param(block.BlockHandle,'MaskValues');
+assumePorts = str2num(char(values(1)));
+guaranteePorts = str2num(char(values(2)));
+modePorts = str2num(char(values(3)));
 
-output = 1;
-
-for i = 1 : block.NumInputPorts
-    output = output & block.InputPort(i).Data
+index = 0;
+% aggregate the logical AND of all assume ports
+assume = 1;
+for i = 1 : assumePorts
+    index = index + 1;
+    assume = assume & block.InputPort(index).Data;
 end
+
+% aggregate the logical AND of all guarantee ports
+guarantee = 1;
+for i = 1 : guaranteePorts
+    index = index + 1;
+    guarantee = guarantee & block.InputPort(index).Data;
+end
+
+% aggregate the logical AND of all mode ports
+mode = 1;
+for i = 1 : mode
+    index = index + 1;
+    mode = mode & block.InputPort(index).Data;
+end
+
+% output = assume => (guarantee and mode)
+output = (~assume)|(guarantee & mode);
 
 block.OutputPort(1).Data = output;
 %end Outputs
