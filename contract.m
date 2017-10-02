@@ -18,8 +18,9 @@ values = get_param(block.BlockHandle,'MaskValues');
 
 % get the size of input ports
 assumePorts = str2num(char(values(1)));
-modePorts = str2num(char(values(2)));
-block.NumInputPorts  = assumePorts + modePorts;
+guaranteePorts = str2num(char(values(2)));
+modePorts = str2num(char(values(3)));
+block.NumInputPorts  = assumePorts + guaranteePorts + modePorts;
 
 % only one output port for the contract
 block.NumOutputPorts = 1;
