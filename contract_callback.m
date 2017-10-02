@@ -32,4 +32,5 @@ end
 index = index + 1;
 portStr(index) = {['port_label(''output'',',num2str(1),',''valid'')']};    
 set_param(block,'MaskDisplay',char(portStr));
+
 end
