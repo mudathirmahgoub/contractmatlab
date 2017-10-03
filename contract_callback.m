@@ -69,8 +69,7 @@ set_param(block,'MaskDisplay',char(portStr));
 
                % connect the new block with its port
                blockPorts = get_param(blockHandle, 'PortConnectivity');
-               add_line(blockModel, [blockPorts(3).Position; portConnectivity(i).Position ]);                
-               blockHandle = -1;
+               add_line(blockModel, [blockPorts(3).Position; portConnectivity(i).Position ]);                               
             end
         end
     end
