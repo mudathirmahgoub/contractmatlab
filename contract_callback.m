@@ -35,10 +35,10 @@ set_param(block,'MaskDisplay',char(portStr));
 
 
  %% add or remove blocks
-    blockModel = bdroot(gcb);
-    open_system(blockModel);
-    BlockPaths = find_system(blockModel,'Type','Block');
-    BlockTypes = get_param(BlockPaths,'BlockType');
-    add_block('Kind/assume',strcat(blockModel,'/','assume'),'MakeNameUnique','on');
+%     blockModel = bdroot(gcb);
+%     open_system(blockModel);
+%     BlockPaths = find_system(blockModel,'Type','Block');
+%     BlockTypes = get_param(BlockPaths,'AncestorBlock');
+%    % add_block('Kind/assume',strcat(blockModel,'/','assume'),'MakeNameUnique','on');
 
 end
