@@ -74,13 +74,12 @@ end
 %%   C-Mex counterpart: mdlSetWorkWidths
 %%
 function DoPostPropSetup(block)
-block.NumDworks = 1;
-  
-  block.Dwork(1).Name            = 'sofar';
-  block.Dwork(1).Dimensions      = 1;
-  block.Dwork(1).DatatypeID      = 8;      % boolean  
-  block.Dwork(1).Complexity      = 'Real';
-  block.Dwork(1).UsedAsDiscState = true;  
+%   block.NumDworks = 1;  
+%   block.Dwork(1).Name            = 'sofar';
+%   block.Dwork(1).Dimensions      = 1;
+%   block.Dwork(1).DatatypeID      = 8;      % boolean  
+%   block.Dwork(1).Complexity      = 'Real';
+%   block.Dwork(1).UsedAsDiscState = true;  
  
 end
 %%
@@ -92,8 +91,9 @@ end
 %%   C-MEX counterpart: mdlStart
 %%
 function Start(block)
+    % delete these lines
     % initial value for assumption so far is true
-    block.Dwork(1).Data = true;        
+    %block.Dwork(1).Data = true;        
 end
 
 %%
@@ -104,8 +104,9 @@ end
 %%   C-MEX counterpart: mdlUpdate
 %%
 function Update(block)
-    assume = getAssumeResult(block);
-    block.Dwork(1).Data = block.Dwork(1).Data & assume;
+%       delete these lines
+%     assume = getAssumeResult(block);
+%     block.Dwork(1).Data = block.Dwork(1).Data & assume;
 end
 %end Update
 
@@ -141,8 +142,9 @@ function Outputs(block)
     end
 
     % output = assumption sofar => (guarantee and mode)
-    output = (~(block.Dwork(1).Data & assume))|(guarantee & mode);
-
+    %ToDo:  delete the next line
+    %output = (~(block.Dwork(1).Data & assume))|(guarantee & mode);
+    output = (~assume)|(guarantee & mode);
     block.OutputPort(1).Data = output;
 end
 

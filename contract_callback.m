@@ -35,10 +35,45 @@ set_param(block,'MaskDisplay',char(portStr));
 
 
  %% add or remove blocks
-%     blockModel = bdroot(gcb);
-%     open_system(blockModel);
-%     BlockPaths = find_system(blockModel,'Type','Block');
-%     BlockTypes = get_param(BlockPaths,'AncestorBlock');
-%    % add_block('Kind/assume',strcat(blockModel,'/','assume'),'MakeNameUnique','on');
+    blockModel = bdroot(gcb);
+    open_system(blockModel);
+    diagramType = get_param(blockModel,'BlockDiagramType');
+    if strcmp(diagramType,'model')
+        blockPaths = find_system(blockModel,'Type','Block');
+        blockTypes = get_param(blockPaths,'BlockType');
+        ports = get_param(gcb,'PortHandles');
+        portConnectivity = get_param(gcb, 'PortConnectivity')
+        
+        for i = 1 : length(portConnectivity)
+            % if the port is not connected
+            if portConnectivity(i).SrcBlock == -1
+                % add a new block
+                if i <= assumePorts                  
+                   blockHandle =  add_block('Kind/assume',strcat(blockModel,'/','assume'),'MakeNameUnique','on');
+                else
+                    if i <= assumePorts + guaranteePorts
+                        blockHandle =  add_block('Kind/guarantee',strcat(blockModel,'/','guarantee'),'MakeNameUnique','on');
+                    else 
+                        blockHandle =  add_block('Kind/mode',strcat(blockModel,'/','mode'),'MakeNameUnique','on');
+                    end
+                end  
+               % move the new block closer to its port
+               position = get_param(blockHandle,'position');
+               width = position(3) - position(1);
+               height = position(4) - position(2);
+               position(1) = portConnectivity(i).Position(1) - width - 10;
+               position(2) = portConnectivity(i).Position(2) - height/2;
+               position(3) = portConnectivity(i).Position(1)  - 10;
+               position(4) = portConnectivity(i).Position(2) + height/2;                   
+               set_param(blockHandle,'position',position);
+
+               % connect the new block with its port
+               blockPorts = get_param(blockHandle, 'PortConnectivity');
+               add_line(blockModel, [blockPorts(3).Position; portConnectivity(i).Position ]);                
+               blockHandle = -1;
+            end
+        end
+    end
+
 
 end
