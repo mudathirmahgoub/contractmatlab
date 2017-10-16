@@ -45,8 +45,10 @@ set_param(block,'MaskDisplay',char(portStr));
     blockPaths = find_system(blockModel,'Type','Block');
     blockTypes = get_param(blockPaths,'BlockType');
     ports = get_param(gcb,'PortHandles');
-    portConnectivity = get_param(gcb, 'PortConnectivity')
-
+    portConnectivity = get_param(gcb, 'PortConnectivity');    
+    [assumptionsPortIndex, ~] = size(portConnectivity);
+    % assumptions port is the first output port
+    assumptionsPortIndex = assumptionsPortIndex -1;
     for i = 1 : length(portConnectivity)
         % if the port is not connected
         if portConnectivity(i).SrcBlock == -1
@@ -73,7 +75,13 @@ set_param(block,'MaskDisplay',char(portStr));
            % connect the new block with its port
            blockPorts = get_param(blockHandle, 'PortConnectivity');
            [outputPortIndex , ~] = size(blockPorts);
-           add_line(blockModel, [blockPorts(outputPortIndex).Position; portConnectivity(i).Position ]);                               
+           add_line(blockModel, [blockPorts(outputPortIndex).Position; portConnectivity(i).Position ]); 
+           
+           % add all assumptions to each mode port
+           if i > assumePorts + guaranteePorts
+               % assume is the first inport in mode block
+               add_line(blockModel, [portConnectivity(assumptionsPortIndex).Position; blockPorts(1).Position]); 
+           end
         end
     end    
 end
