@@ -20,15 +20,18 @@ function setup(block)
     guaranteePorts = str2num(char(values(2)));
     modePorts = str2num(char(values(3)));
     block.NumInputPorts  = assumePorts + guaranteePorts + modePorts;
-    % only one output port for the contract
-    block.NumOutputPorts = 1;
+    % only 2 output ports for the validator
+    block.NumOutputPorts = 2;
 
     % all ports are boolean
     for i = 1 : block.NumInputPorts
         block.InputPort(i).DatatypeID = 8; %'boolean';
     end
-    block.OutputPort(1).DatatypeID = 8; %'boolean';
-
+    
+    for i = 1 : block.NumOutputPorts
+        block.OutputPort(i).DatatypeID = 8; %'boolean';
+    end
+    
     % Setup port properties to be inherited or dynamic
     block.SetPreCompInpPortInfoToDynamic;
     block.SetPreCompOutPortInfoToDynamic;
@@ -73,12 +76,6 @@ end
 %%   C-Mex counterpart: mdlSetWorkWidths
 %%
 function DoPostPropSetup(block)
-%   block.NumDworks = 1;  
-%   block.Dwork(1).Name            = 'sofar';
-%   block.Dwork(1).Dimensions      = 1;
-%   block.Dwork(1).DatatypeID      = 8;      % boolean  
-%   block.Dwork(1).Complexity      = 'Real';
-%   block.Dwork(1).UsedAsDiscState = true;  
  
 end
 %%
@@ -89,10 +86,7 @@ end
 %%   Required         : No
 %%   C-MEX counterpart: mdlStart
 %%
-function Start(block)
-    % delete these lines
-    % initial value for assumption so far is true
-    %block.Dwork(1).Data = true;        
+function Start(block)         
 end
 
 %%
@@ -103,9 +97,6 @@ end
 %%   C-MEX counterpart: mdlUpdate
 %%
 function Update(block)
-%       delete these lines
-%     assume = getAssumeResult(block);
-%     block.Dwork(1).Data = block.Dwork(1).Data & assume;
 end
 %end Update
 
@@ -124,7 +115,9 @@ function Outputs(block)
     modePorts = str2num(char(values(3)));
 
     assume = getAssumeResult(block);
-
+    
+    block.OutputPort(1).Data = assume;
+    
     index = assumePorts;
     % aggregate the logical AND of all guarantee ports
     guarantee = 1;
@@ -140,11 +133,9 @@ function Outputs(block)
         mode = mode & block.InputPort(index).Data;
     end
 
-    % output = assumption sofar => (guarantee and mode)
-    %ToDo:  delete the next line
-    %output = (~(block.Dwork(1).Data & assume))|(guarantee & mode);
+    % output = assumption => (guarantees and modes)    
     output = (~assume)|(guarantee & mode);
-    block.OutputPort(1).Data = output;
+    block.OutputPort(2).Data = output;
 end
 
 

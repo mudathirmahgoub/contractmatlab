@@ -28,9 +28,14 @@ for i= 1 : modePorts
     portStr(index) = {['port_label(''input'',',num2str(index),',''mode'')']};    
 end
 
-% output port
+% output ports
+% assume output port
 index = index + 1;
-portStr(index) = {['port_label(''output'',',num2str(1),',''valid'')']};    
+portStr(index) = {['port_label(''output'',',num2str(1),',''assume'')']};
+% validator output port
+index = index + 1;
+portStr(index) = {['port_label(''output'',',num2str(2),',''valid'')']};
+
 set_param(block,'MaskDisplay',char(portStr));
 
 
