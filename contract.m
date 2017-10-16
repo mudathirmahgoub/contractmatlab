@@ -60,8 +60,7 @@ function setup(block)
     block.RegBlockMethod('SetInputPortSamplingMode',@SetInputPortSamplingMode);
     block.RegBlockMethod('Terminate', @Terminate); % Required
         
-    blockModel = bdroot(gcb);
-    open_system(blockModel);
+    blockModel = get_param(gcb, 'Parent');    
     BlockPaths = find_system(blockModel,'Type','Block');
     BlockTypes = get_param(BlockPaths,'BlockType');
 end
