@@ -167,3 +167,4 @@ function assume = getAssumeResult(block)
         assume = assume & block.InputPort(index).Data;
     end
 end
+

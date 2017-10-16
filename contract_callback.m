@@ -81,9 +81,14 @@ set_param(block,'MaskDisplay',char(portStr));
            if i > assumePorts + guaranteePorts
                % assume is the first inport in mode block
                %add_line(blockModel, [portConnectivity(assumptionsPortIndex).Position; blockPorts(1).Position]); 
-               modePorts = get_param(blockHandle, 'PortHandles')
-               add_line(blockModel, ports.Outport(1) ,modePorts.Inport(1), 'autorouting','on')
+               modePorts = get_param(blockHandle, 'PortHandles');
+               add_line(blockModel, ports.Outport(1) ,modePorts.Inport(1), 'autorouting','on');
+               
+               %register a callback function when the mode inport
+               %connectivity changes
+               set_param(ports.Inport(i), 'ConnectionCallback', 'checkModePort');               
            end
         end
     end    
 end
+
