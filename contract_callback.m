@@ -80,7 +80,9 @@ set_param(block,'MaskDisplay',char(portStr));
            % add all assumptions to each mode port
            if i > assumePorts + guaranteePorts
                % assume is the first inport in mode block
-               add_line(blockModel, [portConnectivity(assumptionsPortIndex).Position; blockPorts(1).Position]); 
+               %add_line(blockModel, [portConnectivity(assumptionsPortIndex).Position; blockPorts(1).Position]); 
+               modePorts = get_param(blockHandle, 'PortHandles')
+               add_line(blockModel, ports.Outport(1) ,modePorts.Inport(1), 'autorouting','on')
            end
         end
     end    
