@@ -54,12 +54,12 @@ set_param(block,'MaskDisplay',char(portStr));
         if portConnectivity(i).SrcBlock == -1
             % add a new block
             if i <= assumePorts                  
-               blockHandle =  add_block('Kind/contract/assume',strcat(blockModel,'/','assume'),'MakeNameUnique','on');
+               blockHandle =  add_block('Kind/assume',strcat(blockModel,'/','assume'),'MakeNameUnique','on');
             else
                 if i <= assumePorts + guaranteePorts
-                    blockHandle =  add_block('Kind/contract/guarantee',strcat(blockModel,'/','guarantee'),'MakeNameUnique','on');
+                    blockHandle =  add_block('Kind/guarantee',strcat(blockModel,'/','guarantee'),'MakeNameUnique','on');
                 else 
-                    blockHandle =  add_block('Kind/contract/mode',strcat(blockModel,'/','mode'),'MakeNameUnique','on');
+                    blockHandle =  add_block('Kind/mode',strcat(blockModel,'/','mode'),'MakeNameUnique','on');
                 end
             end  
            % move the new block closer to its port
@@ -82,8 +82,11 @@ set_param(block,'MaskDisplay',char(portStr));
                % assume is the first inport in mode block
                %add_line(blockModel, [portConnectivity(assumptionsPortIndex).Position; blockPorts(1).Position]); 
                modePorts = get_param(blockHandle, 'PortHandles');
-               add_line(blockModel, ports.Outport(1) ,modePorts.Inport(1), 'autorouting','on');
-               
+                %check if the mode assume port is already connected
+                portLine = get_param(modePorts.Inport(1),'Line'); 
+                if portLine == -1   
+                    add_line(blockModel, ports.Outport(1) ,modePorts.Inport(1), 'autorouting','on');
+                end
                %register a callback function when the mode inport
                %connectivity changes
                set_param(ports.Inport(i), 'ConnectionCallback', 'checkModePort');               
