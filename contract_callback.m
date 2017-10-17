@@ -22,8 +22,8 @@ for i= 1 : guaranteePorts
 end
 
 % get the size of mode ports
-modePorts = str2num(char(values(3)));
-for i= 1 : modePorts
+modeBlocksPorts = str2num(char(values(3)));
+for i= 1 : modeBlocksPorts
     index = index + 1;
     portStr(index) = {['port_label(''input'',',num2str(index),',''mode'')']};    
 end
@@ -40,15 +40,9 @@ set_param(block,'MaskDisplay',char(portStr));
 
 
  %% add or remove blocks
-    blockModel = get_param(gcb, 'Parent');          
-    
-    blockPaths = find_system(blockModel,'Type','Block');
-    blockTypes = get_param(blockPaths,'BlockType');
+    blockModel = get_param(gcb, 'Parent');              
     ports = get_param(gcb,'PortHandles');
-    portConnectivity = get_param(gcb, 'PortConnectivity');    
-    [assumptionsPortIndex, ~] = size(portConnectivity);
-    % assumptions port is the first output port
-    assumptionsPortIndex = assumptionsPortIndex -1;
+    portConnectivity = get_param(gcb, 'PortConnectivity');          
     for i = 1 : length(portConnectivity)
         % if the port is not connected
         if portConnectivity(i).SrcBlock == -1
@@ -92,6 +86,41 @@ set_param(block,'MaskDisplay',char(portStr));
                set_param(ports.Inport(i), 'ConnectionCallback', 'checkModePort');               
            end
         end
-    end    
+    end
+    
+    blockPaths = find_system(blockModel,'SearchDepth',1,'Type','Block');
+    blockTypes = get_param(blockPaths,'BlockType');
+    %set_param('Kind/contract/input1', 'CopyFcn', testvar)
+    for i = 1:length(blockTypes)
+        if strcmp(blockTypes(i),'Inport') 
+            % get the inport outport
+            input = get_param(blockPaths(i), 'PortHandles');
+            inputLine = get_param(input{1,1}.Outport,'Line');
+            
+            destinationBlockHandles = [];
+            if inputLine ~= -1
+                destinationBlockHandles = get_param(inputLine, 'DstBlockHandle');
+            end
+            
+            for j = 1 : (assumePorts + guaranteePorts + modeBlocksPorts)
+                % if the line is not connected to the block
+                if ~ismember(portConnectivity(j).SrcBlock, destinationBlockHandles) 
+                    
+                    % disable the library links for the target block
+                    % for the first time, the SrcBlock is -1, invalid.
+                    set_param(portConnectivity(j).SrcBlock, 'LinkStatus', 'inactive');
+                    % get the target block name
+                    targetBlockName = get_param(portConnectivity(j).SrcBlock, 'Name');
+                    % add new port inside that block
+                    add_block('built-in/Inport', ...
+                                    strcat(blockModel,'/',targetBlockName,'/','input'),'MakeNameUnique','on');
+                    
+                    targetBlockPorts = get_param(portConnectivity(j).SrcBlock, 'PortHandles');
+                    %connect the inport with the block            
+                    add_line(blockModel, input{1,1}.Outport ,targetBlockPorts.Inport(length(targetBlockPorts.Inport)), 'autorouting','on');
+                end
+            end
+        end
+    end
 end
 
