@@ -14,23 +14,26 @@ function setup(block)
 
     % Register number of ports
     values = get_param(block.BlockHandle,'MaskValues');
+    
+    % disable the library link 
+    contractBlock = get_param(block.BlockHandle, 'Parent');    
+    set_param(contractBlock, 'LinkStatus', 'inactive');
 
     % get the size of input ports
     assumePorts = str2num(char(values(1)));
     guaranteePorts = str2num(char(values(2)));
     modePorts = str2num(char(values(3)));
     block.NumInputPorts  = assumePorts + guaranteePorts + modePorts;
-    % only 2 output ports for the validator
-    block.NumOutputPorts = 2;
+    % only a single output port for the validator
+    block.NumOutputPorts = 1;
 
     % all ports are boolean
     for i = 1 : block.NumInputPorts
         block.InputPort(i).DatatypeID = 8; %'boolean';
-    end
+    end    
     
-    for i = 1 : block.NumOutputPorts
-        block.OutputPort(i).DatatypeID = 8; %'boolean';
-    end
+    block.OutputPort(1).DatatypeID = 8; %'boolean';
+    
     
     % Setup port properties to be inherited or dynamic
     block.SetPreCompInpPortInfoToDynamic;
@@ -73,7 +76,12 @@ end
 %%   C-Mex counterpart: mdlSetWorkWidths
 %%
 function DoPostPropSetup(block)
- 
+    block.NumDworks = 1;  
+    block.Dwork(1).Name            = 'sofar';
+    block.Dwork(1).Dimensions      = 1;
+    block.Dwork(1).DatatypeID      = 8;      % boolean  
+    block.Dwork(1).Complexity      = 'Real';
+    block.Dwork(1).UsedAsDiscState = true;
 end
 %%
 %% Start:
@@ -83,7 +91,8 @@ end
 %%   Required         : No
 %%   C-MEX counterpart: mdlStart
 %%
-function Start(block)         
+function Start(block) 
+    block.Dwork(1).Data = true;
 end
 
 %%
@@ -94,6 +103,8 @@ end
 %%   C-MEX counterpart: mdlUpdate
 %%
 function Update(block)
+    assume = getAssumeResult(block);
+    block.Dwork(1).Data = block.Dwork(1).Data & assume;
 end
 %end Update
 
@@ -113,8 +124,6 @@ function Outputs(block)
 
     assume = getAssumeResult(block);
     
-    block.OutputPort(1).Data = assume;
-    
     index = assumePorts;
     % aggregate the logical AND of all guarantee ports
     guarantee = 1;
@@ -130,9 +139,9 @@ function Outputs(block)
         mode = mode & block.InputPort(index).Data;
     end
 
-    % output = assumption => (guarantees and modes)    
-    output = (~assume)|(guarantee & mode);
-    block.OutputPort(2).Data = output;
+    % output = assumption so far => (guarantees and modes)    
+    output = (~(block.Dwork(1).Data & assume))|(guarantee & mode);   
+    block.OutputPort(1).Data = output;
 end
 
 

@@ -24,7 +24,7 @@ function checkModePort(modePortHandle)
             % connect the assumption port of the validator
             % with the assume port of the mode
             blockModel = get_param(gcb, 'Parent'); 
-            add_line(blockModel, destinationPorts.Outport(1) ,sourcePorts.Inport(1), 'autorouting','on');
+            %add_line(blockModel, destinationPorts.Outport(1) ,sourcePorts.Inport(1), 'autorouting','on');
             %hilite_system(sourcePort)
         end
     end

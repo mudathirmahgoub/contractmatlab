@@ -29,20 +29,20 @@ for i= 1 : modeBlocksPorts
 end
 
 % output ports
-% assume output port
-index = index + 1;
-portStr(index) = {['port_label(''output'',',num2str(1),',''assume'')']};
 % validator output port
 index = index + 1;
-portStr(index) = {['port_label(''output'',',num2str(2),',''valid'')']};
+portStr(index) = {['port_label(''output'',',num2str(1),',''valid'')']};
 
 set_param(block,'MaskDisplay',char(portStr));
 
 
- %% add or remove blocks
+    %% add or remove blocks
     blockModel = get_param(gcb, 'Parent');              
     ports = get_param(gcb,'PortHandles');
     portConnectivity = get_param(gcb, 'PortConnectivity'); 
+    
+    gapWidth = 30;
+    gapHeight = 20;
     
     for i = 1 : length(portConnectivity)
         
@@ -67,9 +67,9 @@ set_param(block,'MaskDisplay',char(portStr));
            position = get_param(blockHandle,'position');
            width = position(3) - position(1);
            height = position(4) - position(2);
-           position(1) = portConnectivity(i).Position(1) - width - 30;
+           position(1) = portConnectivity(i).Position(1) - width - gapWidth;
            position(2) = portConnectivity(i).Position(2) - height/2;
-           position(3) = portConnectivity(i).Position(1)  - 30;
+           position(3) = portConnectivity(i).Position(1)  - gapWidth;
            position(4) = portConnectivity(i).Position(2) + height/2;                   
            set_param(blockHandle,'position',position);
 
@@ -84,35 +84,57 @@ set_param(block,'MaskDisplay',char(portStr));
                modePorts = get_param(blockHandle, 'PortHandles');
                % connect require and ensure blocks to the mode block
                if requireBlock ~= -1
+                   
+                   % set the position of the require block
+                   requirePosition = position;
+                   requirePosition(1) = position(3) - position(1) - gapWidth;
+                   requirePosition(3) = position(1) - gapWidth;                   
+                   requirePosition(2) = position(2) - gapHeight;
+                   requirePosition(4) = position(4) - (position(4) - position(2))/2 - gapHeight;
+                   
+                   set_param(requireBlock,'position',requirePosition);                  
+                   
                    % get the require ports
                    requirePorts = get_param(requireBlock, 'PortHandles');
-                   % connect the require port with the mode block
-                    add_line(blockModel, requirePorts.Outport(1) ,modePorts.Inport(2), 'autorouting','on');
+                   % connect the require port with the mode block port 1
+                    add_line(blockModel, requirePorts.Outport(1) ,modePorts.Inport(1), 'autorouting','on');
                end
                
                if ensureBlock ~= -1
+                   
+                   % set the position of the ensure block
+                    ensurePosition = position;
+                    ensurePosition(1) = position(3) - position(1) - gapWidth;
+                    ensurePosition(3) = position(1) - gapWidth;
+                    ensurePosition(2) = position(2) + gapHeight;
+                    ensurePosition(4) = position(4) - (position(4) - position(2))/2 + gapHeight;
+                    set_param(ensureBlock,'position',ensurePosition);
+                   
                    % get the ensure ports
                    ensurePorts = get_param(ensureBlock, 'PortHandles');
-                   % connect the ensure port with the mode block
-                    add_line(blockModel, ensurePorts.Outport(1) ,modePorts.Inport(3), 'autorouting','on');
+                   % connect the ensure port with the mode block port 2
+                    add_line(blockModel, ensurePorts.Outport(1) ,modePorts.Inport(2), 'autorouting','on');
                end
                
                 %check if the mode assume port is already connected
-                portLine = get_param(modePorts.Inport(1),'Line'); 
-                if portLine == -1   
+                %portLine = get_param(modePorts.Inport(1),'Line'); 
+                %if portLine == -1   
                     % connect the assumption port with the mode block
-                    add_line(blockModel, ports.Outport(1) ,modePorts.Inport(1), 'autorouting','on');
-                end
+                 %   add_line(blockModel, ports.Outport(1) ,modePorts.Inport(1), 'autorouting','on');
+                %end
                %register a callback function when the mode inport
                %connectivity changes
-               set_param(ports.Inport(i), 'ConnectionCallback', 'checkModePort');               
+               %set_param(ports.Inport(i), 'ConnectionCallback', 'checkModePort');               
            end
         end
     end
     
+    %% connect input blocks with assume, guarantee, requires and ensure
+    % blocks
+    
     blockPaths = find_system(blockModel,'SearchDepth',1,'Type','Block');
     blockTypes = get_param(blockPaths,'BlockType');
-    %set_param('Kind/contract/input1', 'CopyFcn', testvar)
+    
     for i = 1:length(blockTypes)
         if strcmp(blockTypes(i),'Inport') 
             
@@ -155,7 +177,7 @@ set_param(block,'MaskDisplay',char(portStr));
                 modePorts =  get_param(portConnectivity(j).SrcBlock, 'PortHandles');
                 
                 % get the block of the require port
-                requireLine = get_param(modePorts.Inport(2), 'Line');
+                requireLine = get_param(modePorts.Inport(1), 'Line');
                 requireBlockHandle = get_param(requireLine, 'SrcBlockHandle');
                  if ~ismember(requireBlockHandle, destinationBlockHandles) 
                     
@@ -175,7 +197,7 @@ set_param(block,'MaskDisplay',char(portStr));
                  end            
                 
                  % get the block of the ensure port
-                ensureLine = get_param(modePorts.Inport(3), 'Line');
+                ensureLine = get_param(modePorts.Inport(2), 'Line');
                 ensureBlockHandle = get_param(ensureLine, 'SrcBlockHandle');
                  if ~ismember(ensureBlockHandle, destinationBlockHandles) 
                     
