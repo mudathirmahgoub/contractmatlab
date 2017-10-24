@@ -37,9 +37,10 @@ set_param(block,'MaskDisplay',char(portStr));
 
 
     %% add or remove blocks
-    blockModel = get_param(gcb, 'Parent');              
-    ports = get_param(gcb,'PortHandles');
-    portConnectivity = get_param(gcb, 'PortConnectivity'); 
+    blockModel = get_param(gcb, 'Parent');     
+    validatorBlock = gcb;
+    ports = get_param(validatorBlock,'PortHandles');
+    portConnectivity = get_param(validatorBlock, 'PortConnectivity'); 
     
     gapWidth = 30;
     gapHeight = 20;
@@ -134,7 +135,7 @@ set_param(block,'MaskDisplay',char(portStr));
     
     blockPaths = find_system(blockModel,'SearchDepth',1,'Type','Block');
     blockTypes = get_param(blockPaths,'BlockType');
-    
+    portConnectivity = get_param(validatorBlock, 'PortConnectivity');  
     for i = 1:length(blockTypes)
         if strcmp(blockTypes(i),'Inport') 
             
@@ -171,16 +172,18 @@ set_param(block,'MaskDisplay',char(portStr));
             end
             
             for j = (assumePorts + guaranteePorts +1) : (assumePorts + guaranteePorts+ modeBlocksPorts)
-                % disable the library links for the target block
-                % for the first time, the SrcBlock is -1, invalid.
-                set_param(portConnectivity(j).SrcBlock, 'LinkStatus', 'inactive');
-                modePorts =  get_param(portConnectivity(j).SrcBlock, 'PortHandles');
-                
+                               
                 % get the block of the require port
                 requireLine = get_param(modePorts.Inport(1), 'Line');
                 requireBlockHandle = get_param(requireLine, 'SrcBlockHandle');
                  if ~ismember(requireBlockHandle, destinationBlockHandles) 
-                    
+               
+                    % disable the library links for the target block
+                    % for the first time, the SrcBlock is -1, invalid.
+                    set_param(portConnectivity(j).SrcBlock, 'LinkStatus', 'inactive');
+                    modePorts =  get_param(portConnectivity(j).SrcBlock, 'PortHandles');
+                     
+                     
                     % disable the library links for the target block
                     % for the first time, the SrcBlock is -1, invalid.
                     set_param(requireBlockHandle, 'LinkStatus', 'inactive');
