@@ -172,7 +172,10 @@ set_param(block,'MaskDisplay',char(portStr));
             end
             
             for j = (assumePorts + guaranteePorts +1) : (assumePorts + guaranteePorts+ modeBlocksPorts)
-                               
+                
+                % get the mode ports
+                modePorts = get_param(portConnectivity(j).SrcBlock, 'PortHandles');
+                
                 % get the block of the require port
                 requireLine = get_param(modePorts.Inport(1), 'Line');
                 requireBlockHandle = get_param(requireLine, 'SrcBlockHandle');
