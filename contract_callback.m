@@ -133,7 +133,7 @@ set_param(block,'MaskDisplay',char(portStr));
     %% connect input blocks with assume, guarantee, requires and ensure
     % blocks
     
-    blockPaths = find_system(blockModel,'SearchDepth',1,'Type','Block');
+    blockPaths = find_system(blockModel,'SearchDepth',1, 'LookUnderMasks', 'all','Type','Block');
     blockTypes = get_param(blockPaths,'BlockType');
     portConnectivity = get_param(validatorBlock, 'PortConnectivity');  
     for i = 1:length(blockTypes)
